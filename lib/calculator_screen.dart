@@ -18,13 +18,20 @@ class _CalculatorScreenState extends State<CalculatorScreen>  with SingleTickerP
   final TextEditingController controller = TextEditingController();
   String result = '0';
   final DatabaseHelper _dbHelper = DatabaseHelper();
+    late AnimationController _animationController;
+
   late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
-    
-    super.initState();
-
+  super.initState();
+     _animationController = AnimationController(
+      duration: Duration(milliseconds: 150),
+      vsync: this,
+    );
+ _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
   }
   @override
   void dispose() {
@@ -36,7 +43,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>  with SingleTickerP
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Result copied to clipboard!'),
-        backgroundColor: Colors.green.withOpacity(0.8),
+        backgroundColor: Colors.green.withValues(alpha:0.8),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -91,7 +98,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>  with SingleTickerP
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.07),
+                            color: Colors.black.withValues(alpha:0.07),
                             blurRadius: 8,
                             offset: Offset(0, 4),
                           ),
@@ -127,7 +134,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>  with SingleTickerP
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.07),
+                      color: Colors.black.withValues(alpha:0.07),
                       blurRadius: 12,
                       offset: Offset(0, 4),
                     ),
@@ -163,7 +170,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>  with SingleTickerP
                               border: InputBorder.none,
                               hintText: '0',
                               hintStyle: TextStyle(
-                                color: Color(0xFF222222).withOpacity(0.5),
+                                color: Color(0xFF222222).withValues(alpha:0.5),
                                 fontSize: 48,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -297,11 +304,7 @@ Widget _buildBottomRow(Size size) {
 // ────────────────── ENHANCED BUTTON BUILDER ────────────────────
 Widget _buildEnhancedButton(String value, Size size, {bool isWide = false}) {
   final buttonHeight = (size.width - 80) / 5; // Responsive height
-  final isOperator = [
-    Btn.per, Btn.multiply, Btn.add, Btn.subtract, 
-    Btn.divide, Btn.calculate,
-  ].contains(value);
-  final isSpecial = [Btn.del, Btn.clr].contains(value);
+ 
   
   return Container(
     height: buttonHeight,
@@ -316,14 +319,14 @@ Widget _buildEnhancedButton(String value, Size size, {bool isWide = false}) {
           spreadRadius: 0,
         ),
         BoxShadow(
-          color: Colors.white.withOpacity(0.9),
+          color: Colors.white.withValues(alpha:0.9),
           blurRadius: 1,
           offset: Offset(0, -1),
           spreadRadius: 0,
         ),
       ],
       border: Border.all(
-        color: Colors.white.withOpacity(0.3),
+        color: Colors.white.withValues(alpha:0.3),
         width: 1,
       ),
     ),
@@ -332,8 +335,8 @@ Widget _buildEnhancedButton(String value, Size size, {bool isWide = false}) {
       child: InkWell(
         onTap: () => _onBtnTap(value),
         borderRadius: BorderRadius.circular(isWide ? 32 : 24),
-        splashColor: Colors.white.withOpacity(0.3),
-        highlightColor: Colors.white.withOpacity(0.1),
+        splashColor: Colors.white.withValues(alpha:0.3),
+        highlightColor: Colors.white.withValues(alpha:0.1),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(isWide ? 32 : 24),
@@ -356,43 +359,6 @@ Widget _buildEnhancedButton(String value, Size size, {bool isWide = false}) {
 }
 
 
-  // ────────────────── BUILD SINGLE BUTTON ────────────────────
-  Widget _buildButton(String value) => Padding(
-    padding: const EdgeInsets.all(4.0),
-    child: Material(
-      color: _btnColor(value),
-      shape: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(100),
-        borderSide: BorderSide(color: Colors.black.withOpacity(0.07)),
-      ),
-      clipBehavior: Clip.hardEdge,
-      child: InkWell(
-        onTap: () => _onBtnTap(value),
-        child: Center(
-          child: Text(
-            value,
-            style: TextStyle(
-              fontSize: 24, 
-              fontWeight: FontWeight.bold,
-              color: _getTextColor(value),
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
-  
-  Color _getTextColor(String value) {
-    // For white buttons, use dark text
-    if (![
-      Btn.del, Btn.clr, Btn.per, Btn.multiply, Btn.add, 
-      Btn.subtract, Btn.divide, Btn.calculate,
-    ].contains(value)) {
-      return Color(0xFF222222);
-    }
-    // For colored buttons, use white text
-    return Colors.white;
-  }
 
   // ─────────────────── BUTTON TAP LOGIC ──────────────────────
   void _onBtnTap(String value) {
@@ -519,7 +485,7 @@ Widget _buildEnhancedButton(String value, Size size, {bool isWide = false}) {
         .replaceAll(Btn.multiply, '*')
         .replaceAll(Btn.divide, '/');
 
-    final node = Parser().parse(parsed);
+    final node = GrammarParser().parse(parsed);
     final val = node.evaluate(EvaluationType.REAL, ContextModel()) as double;
 
     return val
@@ -527,20 +493,7 @@ Widget _buildEnhancedButton(String value, Size size, {bool isWide = false}) {
         .replaceAll(RegExp(r'\.?0+$'), ''); // trim trailing zeros
   }
 
-  // ──────────────────── UI HELPERS ──────────────────────────
-  Color _btnColor(String v) {
-    if ([Btn.del, Btn.clr].contains(v)) return Colors.red;
-    if ([
-      Btn.per,
-      Btn.multiply,
-      Btn.add,
-      Btn.subtract,
-      Btn.divide,
-      Btn.calculate,
-    ].contains(v))
-      return Color(0xFFFF9800); // Using the provided FF9800 orange color
-    return Colors.white;
-  }
+ 
 }
 
 // ──────────────────── ENHANCED STYLING HELPERS ──────────────────────
@@ -582,17 +535,17 @@ LinearGradient _getButtonGradient(String value) {
 
 Color _getButtonShadowColor(String value) {
   if ([Btn.del, Btn.clr].contains(value)) {
-    return Color(0xFFF44336).withOpacity(0.3);
+    return Color(0xFFF44336).withValues(alpha:0.3);
   }
   
   if ([
     Btn.per, Btn.multiply, Btn.add, Btn.subtract, 
     Btn.divide, Btn.calculate,
   ].contains(value)) {
-    return Color(0xFFFF9800).withOpacity(0.3);
+    return Color(0xFFFF9800).withValues(alpha:0.3);
   }
   
-  return Colors.black.withOpacity(0.1);
+  return Colors.black.withValues(alpha:0.1);
 }
 
 Color _getEnhancedTextColor(String value) {

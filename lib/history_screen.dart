@@ -2,12 +2,13 @@ import 'package:calculator/helpers/db.dart';
 import 'package:flutter/material.dart';
 
 class HistorySheet extends StatefulWidget {
+
   final DatabaseHelper dbHelper;
 
-  HistorySheet({required this.dbHelper});
+  const HistorySheet({super.key, required this.dbHelper});
 
   @override
-  _HistorySheetState createState() => _HistorySheetState();
+  State<HistorySheet> createState() => _HistorySheetState();
 }
 
 class _HistorySheetState extends State<HistorySheet> {
@@ -40,11 +41,11 @@ class _HistorySheetState extends State<HistorySheet> {
     return Container(
       height: MediaQuery.of(context).size.height * 0.7,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.95),
+        color: Colors.white.withValues(alpha:0.95),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha:0.2),
             blurRadius: 20,
             offset: Offset(0, -10),
           ),
@@ -74,7 +75,7 @@ class _HistorySheetState extends State<HistorySheet> {
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.1),
+                        color: Colors.red.withValues(alpha:0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -100,7 +101,7 @@ class _HistorySheetState extends State<HistorySheet> {
                         Icon(
                           Icons.history,
                           size: 64,
-                          color: Colors.grey.withOpacity(0.5),
+                          color: Colors.grey.withValues(alpha:0.5),
                         ),
                         SizedBox(height: 16),
                         Text(
@@ -123,7 +124,7 @@ class _HistorySheetState extends State<HistorySheet> {
                         ),
                         padding: EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.grey.withOpacity(0.1),
+                          color: Colors.grey.withValues(alpha:0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Column(
